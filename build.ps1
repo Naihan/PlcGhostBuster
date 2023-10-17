@@ -16,6 +16,9 @@ $manifestSplat = @{
     Author            = 'Nimrod Ken Dror'
     NestedModules     = @("PlcGhostBuster.dll")
     CmdletsToExport = @('Get-PlcControllerTags', 'Get-PlcTagValue', 'Set-PlcTagValue')
+	ProjectUri  = "https://github.com/Naihan/PlcGhostBuster"
+	LicenseUri = "https://www.apache.org/licenses/LICENSE-2.0"
+	Description = "Plc controller powershell module"
 }
 
 New-ModuleManifest @manifestSplat

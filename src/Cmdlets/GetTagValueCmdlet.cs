@@ -15,7 +15,7 @@ namespace PlcGhostBuster.Cmdlets
             _service = new PlcGhostBusterService();
         }
 
-        [Parameter(Position = 0)]
+        [Parameter(Position = 0, ValueFromPipeline = true)]
         public QuantumTag Tag { get; set; }
 
         protected override void EndProcessing()
