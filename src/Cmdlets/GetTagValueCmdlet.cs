@@ -1,12 +1,14 @@
 ﻿using PlcGhostBuster.Entities;
 using PlcGhostBuster.Interfaces;
 using PlcGhostBuster.Services;
+using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
 
 namespace PlcGhostBuster.Cmdlets
 {
     [Cmdlet(VerbsCommon.Get, "PlcTagValue")]
-    public class GetPlcTagValueCmdlet : PSCmdlet
+    public class GetPlcTagValueCmdlet : Cmdlet
     {
         private readonly IPlcGhostBusterService _service;
 
@@ -15,24 +17,26 @@ namespace PlcGhostBuster.Cmdlets
             _service = new PlcGhostBusterService();
         }
 
-        [Parameter(Position = 0, ValueFromPipeline = true)]
-        public QuantumTag Tag { get; set; }
+        [Parameter(Position = 0,
+            ValueFromPipeline = true,
+            ValueFromPipelineByPropertyName = true,
+            Mandatory = true)]
+        public IEnumerable<QuantumTag> Tag { get; set; }
 
-        protected override void EndProcessing()
+        protected override void ProcessRecord()
         {
-            var results = _service.GetTagValue(this.Tag);
+            foreach (var tag in Tag)
+            {
+                var singleResult = _service.GetTagValue(tag);
+                singleResult.Wait();
 
-            //await for results
-            results.Wait();
-
-            if (results.IsFaulted)
-                this.WriteError(new ErrorRecord(results.Exception,
-                                    ErrorCategory.InvalidOperation.ToString(),
-                                    ErrorCategory.InvalidOperation, null));
-            else
-                this.WriteObject(results.Result);
-
-            base.EndProcessing();
+                if (singleResult.IsFaulted)
+                    this.WriteError(new ErrorRecord(singleResult.Exception,
+                                        ErrorCategory.InvalidOperation.ToString(),
+                                        ErrorCategory.InvalidOperation, null));
+                else
+                    this.WriteObject(singleResult.Result);
+            }
         }
     }
 }

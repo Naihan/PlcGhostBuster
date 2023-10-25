@@ -6,7 +6,7 @@ using System.Management.Automation;
 namespace PlcGhostBuster.Cmdlets
 {
     [Cmdlet(VerbsCommon.Set, "PlcTagValue")]
-    public class SetPlcTagValueCmdlet : PSCmdlet
+    public class SetPlcTagValueCmdlet : Cmdlet
     {
         private readonly IPlcGhostBusterService _service;
 
@@ -21,7 +21,7 @@ namespace PlcGhostBuster.Cmdlets
         [Parameter(Position = 1)]
         public dynamic TagValue { get; set; }
 
-        protected override void EndProcessing()
+        protected override void ProcessRecord()
         {
             var results = _service.SetTagValue(this.Tag, this.TagValue);
 
@@ -32,8 +32,6 @@ namespace PlcGhostBuster.Cmdlets
                 this.WriteError(new ErrorRecord(results.Exception,
                                     ErrorCategory.InvalidOperation.ToString(),
                                     ErrorCategory.InvalidOperation, null));
-
-            base.EndProcessing();
         }
     }
 }

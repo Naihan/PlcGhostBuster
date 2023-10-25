@@ -19,6 +19,7 @@ $manifestSplat = @{
 	ProjectUri  = "https://github.com/Naihan/PlcGhostBuster"
 	LicenseUri = "https://www.apache.org/licenses/LICENSE-2.0"
 	Description = "Plc controller powershell module"
+	ModuleVersion = "1.1"
 }
 
 New-ModuleManifest @manifestSplat

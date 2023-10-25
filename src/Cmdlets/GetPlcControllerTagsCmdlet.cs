@@ -9,7 +9,7 @@ using System.Text;
 namespace PlcGhostBuster.Cmdlets
 {
     [Cmdlet(VerbsCommon.Get, "PlcControllerTags")]
-    public class GetPlcControllerTagsCmdlet : PSCmdlet
+    public class GetPlcControllerTagsCmdlet : Cmdlet
     {
         private readonly IPlcGhostBusterService _service;
 
@@ -33,7 +33,7 @@ namespace PlcGhostBuster.Cmdlets
         [Parameter(Position = 4)]
         public string Pattern { get; set; }
 
-        protected override void EndProcessing()
+        protected override void ProcessRecord()
         {
             var results = _service.GetControllerTags(this.Gateway,
                                                         this.Path,
@@ -50,8 +50,6 @@ namespace PlcGhostBuster.Cmdlets
                                     ErrorCategory.InvalidOperation, null));
             else
                 this.WriteObject(results.Result);
-
-            base.EndProcessing();
         }
     }
 }
