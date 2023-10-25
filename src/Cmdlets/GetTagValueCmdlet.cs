@@ -21,7 +21,7 @@ namespace PlcGhostBuster.Cmdlets
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true,
             Mandatory = true)]
-        public IEnumerable<QuantumTag> Tag { get; set; }
+        public QuantumTag[] Tag { get; set; }
 
         protected override void ProcessRecord()
         {
