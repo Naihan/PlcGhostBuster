@@ -10,11 +10,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using PlcGhostBuster.Extensions;
 using PlcGhostBuster.Mappers;
+using libplctag.NativeImport;
 
 namespace PlcGhostBuster.Services
 {
     public class PlcGhostBusterService : IPlcGhostBusterService
     {
+        public PlcGhostBusterService()
+        {
+            plctag.ForceExtractLibrary = false;
+        }
+
         private ITag GetMapper(TagType tagType)
         {
             ITag result;
