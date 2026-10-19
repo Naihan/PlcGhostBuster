@@ -16,9 +16,17 @@ namespace PlcGhostBuster.Services
 {
     public class PlcGhostBusterService : IPlcGhostBusterService
     {
-        public PlcGhostBusterService()
+        static PlcGhostBusterService()
         {
-            plctag.ForceExtractLibrary = false;
+            //can only be done before the native library is loaded, so do it once per session
+            try
+            {
+                NativeLibraryLoader.Init();
+            }
+            catch (InvalidOperationException)
+            {
+                //library already initialized
+            }
         }
 
         private ITag GetMapper(TagType tagType)
@@ -341,22 +349,50 @@ namespace PlcGhostBuster.Services
             return tag;
         }
 
-        private IEnumerable<TagInfo> GetAllControllerTags(string gateway, string path, PlcType plcType, Protocol protocol)
+        private TagInfo[] ReadTagList(string gateway, string path, PlcType plcType, Protocol protocol, string listName)
         {
-            var tags = new Tag<TagInfoPlcMapper, TagInfo[]>()
+            using (var tags = new Tag<TagInfoPlcMapper, TagInfo[]>()
             {
                 Gateway = gateway,
                 Path = path,
                 PlcType = plcType,
                 Protocol = protocol,
-                Name = "@tags",
+                Name = listName,
                 Timeout = TimeSpan.FromSeconds(10)
-            };
+            })
+            {
+                tags.Read();
+                return tags.Value;
+            }
+        }
 
-            tags.Read();
-            //filter out theprograms
-            return tags.Value
-                .Where(x => !TagIsProgram(x));
+        private IEnumerable<TagInfo> GetAllControllerTags(string gateway, string path, PlcType plcType, Protocol protocol)
+        {
+            var controllerTags = ReadTagList(gateway, path, plcType, protocol, "@tags");
+
+            //controller scoped tags
+            var result = controllerTags.Where(x => !TagIsProgram(x)).ToList();
+
+            //program scoped tags are listed per program under "Program:<name>.@tags"
+            foreach (var program in controllerTags.Where(TagIsProgram))
+            {
+                try
+                {
+                    var programTags = ReadTagList(gateway, path, plcType, protocol, $"{program.Name}.@tags");
+                    foreach (var tag in programTags)
+                    {
+                        //prefix with the program name so the tag can be addressed directly
+                        tag.Name = $"{program.Name}.{tag.Name}";
+                        result.Add(tag);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"------Error listing tags of program {program.Name} -- {ex.Message}");
+                }
+            }
+
+            return result;
         }
 
         private bool TagIsUdt(ushort tagType)

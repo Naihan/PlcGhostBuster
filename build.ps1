@@ -2,6 +2,7 @@ $module = 'PlcGhostBuster'
 
 
 
+if (Test-Path ".\Output\$module") {Remove-Item ".\Output\$module" -Recurse -Force}
 if ((Test-Path ".\Output") -eq $false) {mkdir "Output" | Out-Null}
 if ((Test-Path ".\Output\$module") -eq $false) {mkdir ".\Output\$module"  | Out-Null}
 
@@ -19,7 +20,7 @@ $manifestSplat = @{
 	ProjectUri  = "https://github.com/Naihan/PlcGhostBuster"
 	LicenseUri = "https://www.apache.org/licenses/LICENSE-2.0"
 	Description = "Plc controller powershell module"
-	ModuleVersion = "1.3"
+	ModuleVersion = "1.9"
 }
 
 New-ModuleManifest @manifestSplat
